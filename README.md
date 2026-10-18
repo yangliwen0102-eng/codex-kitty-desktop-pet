@@ -11,7 +11,8 @@
 - 点击 Kitty 或气泡打开 Codex，拖动移动，右键可隐藏状态气泡。
 - 状态气泡点击只唤起聊天窗口，授权仍由用户在 Codex 中确认。
 
-当前已在 **Windows 11 x64** 上验证，**尚不能直接安装到 macOS**。
+Windows 版已在 **Windows 11 x64** 上验证；macOS 原生适配及构建方法见 [macOS 说明](docs/MACOS.md)。
+Windows EXE 不能安装到 Mac，请在 Mac 构建 `.app`。
 完整版本说明、恢复方法及 Mac 适配清单见 [个人版本存档](docs/PERSONAL_VERSION.md)。
 
 ![个人版预览](assets/pixel/status-bubble-preview.png)

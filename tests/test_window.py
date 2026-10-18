@@ -23,8 +23,10 @@ ROOT = Path(__file__).resolve().parent.parent
 
 class PetWindowTests(unittest.TestCase):
     def test_brief_monitor_states_do_not_change_pose(self) -> None:
-        window = PetWindow(PetSettings(), ROOT / "assets/generated/asset-manifest.json",
-                           logging.getLogger("quiet-state-test"))
+        # Isolate timing assertions from this machine's running Codex tasks.
+        with patch("codex_pet.window.CodexMonitor.start"):
+            window = PetWindow(PetSettings(), ROOT / "assets/generated/asset-manifest.json",
+                               logging.getLogger("quiet-state-test"))
         window.monitor.stop()
         window.state_machine.active_tasks.clear()
         window.state_machine.pending_approvals.clear()

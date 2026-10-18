@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -10,6 +11,8 @@ APP_NAME = "CodexKittyPet"
 
 
 def app_data_dir() -> Path:
+    if sys.platform == "darwin":
+        return Path.home() / "Library" / "Application Support" / APP_NAME
     base = Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local"))
     return base / APP_NAME
 

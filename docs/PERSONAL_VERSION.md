@@ -28,9 +28,14 @@
 源码重新构建沿用 README 和 `build.ps1`。构建脚本会隔离其他工具的 PATH，
 避免同名系统 DLL 被误打包。皮肤源图、预览和生成说明都保存在 `assets/pixel/`。
 
-## macOS：后续适配起点
+## macOS：适配记录
 
-目前仅 Windows 版本可运行，Windows EXE 不能用于 macOS。以下是移植清单，
+2026-10-18：新增 macOS 平台隔离、原生应用激活、输入检测、设置路径与架构自动检测构建脚本。
+运行和验证范围见 [MACOS.md](MACOS.md)。以下保留原移植清单作为历史起点。
+
+### 原始适配清单
+
+原存档仅 Windows 版本可运行，Windows EXE 不能用于 macOS。以下是原移植清单，
 不是已经完成或验证的 Mac 安装说明：
 
 1. `requirements.txt`：将 `pywin32` 设为仅 Windows 安装的依赖。

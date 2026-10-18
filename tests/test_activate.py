@@ -1,10 +1,12 @@
 import logging
+import sys
 import unittest
 from unittest.mock import Mock, patch
 
 from codex_pet.activate import activate_codex
 
 
+@unittest.skipUnless(sys.platform == "win32", "Windows native activation")
 class ActivateTests(unittest.TestCase):
     @patch("codex_pet.activate.win32process")
     @patch("codex_pet.activate.win32gui")

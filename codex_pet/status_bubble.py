@@ -1,5 +1,6 @@
 """Quiet status card and read-only task title lookup."""
 import sqlite3
+import sys
 import time
 from contextlib import closing
 from pathlib import Path
@@ -50,11 +51,13 @@ class StatusBubble(QFrame):
                             Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.WindowDoesNotAcceptFocus)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating, True)
+        if sys.platform == "darwin":
+            self.setAttribute(Qt.WidgetAttribute.WA_MacAlwaysShowToolWindow, True)
         self.setFixedSize(300, 76)
         self.setObjectName("statusCard")
         self.setStyleSheet(
             "QFrame#statusCard { background: rgba(255,255,255,242); border: 1px solid #dedee5; border-radius: 24px; }"
-            "QLabel { border: none; background: transparent; color: #252531; font-family: 'Microsoft YaHei UI'; }"
+            "QLabel { border: none; background: transparent; color: #252531; font-family: 'PingFang SC', 'Microsoft YaHei UI'; }"
             "QLabel#taskTitle { font-size: 13px; font-weight: 600; }"
             "QLabel#taskStatus { font-size: 12px; color: #737382; }"
         )

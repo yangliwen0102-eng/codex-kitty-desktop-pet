@@ -3,12 +3,28 @@ import logging
 import ctypes
 
 import psutil
-import win32con
-import win32gui
-import win32process
+import sys
+
+if sys.platform == "win32":
+    import win32con
+    import win32gui
+    import win32process
 
 
 def activate_codex(logger: logging.Logger) -> bool:
+    if sys.platform == "darwin":
+        from AppKit import NSWorkspace, NSApplicationActivateIgnoringOtherApps
+        for app in NSWorkspace.sharedWorkspace().runningApplications():
+            if app.bundleIdentifier() == "com.openai.codex":
+                return bool(app.activateWithOptions_(NSApplicationActivateIgnoringOtherApps))
+        logger.warning("No running Codex application found")
+        return False
+    if sys.platform != "win32":
+        return False
+    return _activate_windows(logger)
+
+
+def _activate_windows(logger: logging.Logger) -> bool:
     candidates = []
 
     def collect(hwnd, _):

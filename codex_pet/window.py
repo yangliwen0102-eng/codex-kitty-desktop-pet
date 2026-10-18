@@ -1,13 +1,10 @@
 from __future__ import annotations
 
-import ctypes
 import logging
+import sys
 import time
 from pathlib import Path
 
-import psutil
-import win32gui
-import win32process
 from PyQt6.QtCore import QPoint, QSize, Qt, QTimer
 from PyQt6.QtGui import QAction, QCloseEvent, QCursor, QEnterEvent, QIcon, QMouseEvent
 from PyQt6.QtWidgets import (
@@ -25,6 +22,7 @@ from PyQt6.QtWidgets import (
 
 from .animation import AnimationPlayer
 from .activate import activate_codex
+from .platform_support import last_input_tick, codex_is_foreground
 from .codex_monitor import CodexMonitor
 from .config import PetSettings
 from .state_machine import MonitorEvent, PetState, PetStateMachine
@@ -101,32 +99,6 @@ class UsagePopup(QFrame):
         self.source_label.setText(f"数据来源：{source}")
 
 
-class LASTINPUTINFO(ctypes.Structure):
-    _fields_ = [("cbSize", ctypes.c_uint), ("dwTime", ctypes.c_uint)]
-
-
-def last_input_tick() -> int:
-    info = LASTINPUTINFO()
-    info.cbSize = ctypes.sizeof(info)
-    if not ctypes.windll.user32.GetLastInputInfo(ctypes.byref(info)):
-        return 0
-    return int(info.dwTime)
-
-
-def codex_is_foreground() -> bool:
-    try:
-        hwnd = win32gui.GetForegroundWindow()
-        if not hwnd:
-            return False
-        _, process_id = win32process.GetWindowThreadProcessId(hwnd)
-        process = psutil.Process(process_id)
-        executable = process.exe().lower()
-        name = process.name().lower()
-        return "openai.codex_" in executable or name in {"codex.exe", "chatgpt.exe"} and "windowsapps" in executable
-    except (psutil.Error, OSError):
-        return False
-
-
 class PetWindow(QWidget):
     def __init__(
         self,
@@ -169,6 +141,8 @@ class PetWindow(QWidget):
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
         self.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground, True)
+        if sys.platform == "darwin":
+            self.setAttribute(Qt.WidgetAttribute.WA_MacAlwaysShowToolWindow, True)
         self.setMouseTracking(True)
         self.setToolTip("单击打开 Codex · 拖动移动 Kitty · 右键打开菜单")
 
