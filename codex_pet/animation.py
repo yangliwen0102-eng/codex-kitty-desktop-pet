@@ -8,6 +8,7 @@ from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import QLabel
 
 from .state_machine import PetState
+from .pixel_skin import render_pixel_frames
 
 
 class AnimationPlayer(QObject):
@@ -37,6 +38,16 @@ class AnimationPlayer(QObject):
         self.frame_index = 0
         self._durations = [int(value) for value in record["durationsMs"]]
         self._loop = bool(record["loop"])
+        pixel_atlas = self.manifest.get("pixelAtlas")
+        if pixel_atlas:
+            self._frames = render_pixel_frames(self.assets_root / pixel_atlas, state, self.display_size)
+            self._durations = [2000, 1000, 1000, 2000]
+            if state is PetState.CLOSING:
+                self._durations = [220] * len(self._frames)
+            elif state is PetState.COMPLETED:
+                self._durations = [500] * len(self._frames)
+            self._show_current()
+            return
         self._frames = [
             QPixmap(str(self.assets_root / relative_path)).scaled(
                 self.display_size,

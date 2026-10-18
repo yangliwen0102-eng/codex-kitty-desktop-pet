@@ -48,6 +48,11 @@ def main(argv: list[str] | None = None) -> int:
         if not manifest_path.exists():
             print(f"Missing asset manifest: {manifest_path}")
             return 1
+        import json
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if manifest.get("pixelAtlas") and not (manifest_path.parent / manifest["pixelAtlas"]).is_file():
+            print("Missing pixel atlas")
+            return 1
         print("Codex Kitty Pet runtime check passed")
         return 0
     app = QApplication(sys.argv[:1])

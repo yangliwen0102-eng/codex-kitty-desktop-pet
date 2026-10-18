@@ -1,5 +1,6 @@
 {
   "name": "Codex Kitty Desktop Pet",
+  "pixelAtlas": "../pixel/kitty-atlas-refined.png",
   "sourceOnly": true,
   "canvas": [
     320,

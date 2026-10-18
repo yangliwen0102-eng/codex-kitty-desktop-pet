@@ -4,10 +4,13 @@ import logging
 import os
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PyQt6.QtWidgets import QApplication  # noqa: E402
+from PyQt6.QtCore import QPointF, Qt, QEvent
+from PyQt6.QtGui import QMouseEvent
 
 from codex_pet.config import PetSettings  # noqa: E402
 from codex_pet.state_machine import EventKind, MonitorEvent, PetState  # noqa: E402
@@ -19,6 +22,47 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 class PetWindowTests(unittest.TestCase):
+    def test_brief_monitor_states_do_not_change_pose(self) -> None:
+        window = PetWindow(PetSettings(), ROOT / "assets/generated/asset-manifest.json",
+                           logging.getLogger("quiet-state-test"))
+        window.monitor.stop()
+        window.state_machine.active_tasks.clear()
+        window.state_machine.pending_approvals.clear()
+        window.state_machine.celebrating = False
+        window.state_machine.failed = False
+        window.player.set_state(PetState.IDLE, restart=True)
+        with patch("codex_pet.window.time.monotonic", return_value=100.0) as clock:
+            window._handle_monitor_event(MonitorEvent(EventKind.TASK_STARTED, "quiet-thread"))
+            self.assertEqual(window.player.current_state, PetState.IDLE)
+            clock.return_value = 101.3
+            window._refresh_state()
+            self.assertEqual(window.player.current_state, PetState.WORKING)
+            window._handle_monitor_event(MonitorEvent(EventKind.APPROVAL_REQUESTED, "quiet-thread", call_id="brief"))
+            clock.return_value = 101.5
+            window._handle_monitor_event(MonitorEvent(EventKind.APPROVAL_RESOLVED, "quiet-thread", call_id="brief"))
+            self.assertEqual(window.player.current_state, PetState.WORKING)
+        window.quit_pet()
+
+    def test_click_opens_chat_but_drag_only_moves_pet(self) -> None:
+        window = PetWindow(PetSettings(window_x=50, window_y=50),
+                           ROOT / "assets/generated/asset-manifest.json",
+                           logging.getLogger("click-test"), demo_mode=True)
+        def event(kind, position, button, buttons):
+            return QMouseEvent(kind, QPointF(30, 30), QPointF(position), button, buttons, Qt.KeyboardModifier.NoModifier)
+        left = Qt.MouseButton.LeftButton
+        with patch.object(window, "open_codex") as opened, patch.object(window.settings, "save") as saved:
+            window.mousePressEvent(event(QEvent.Type.MouseButtonPress, QPointF(80, 80), left, left))
+            window.mouseReleaseEvent(event(QEvent.Type.MouseButtonRelease, QPointF(80, 80), left, Qt.MouseButton.NoButton))
+            opened.assert_called_once()
+            saved.assert_not_called()
+            opened.reset_mock()
+            window.mousePressEvent(event(QEvent.Type.MouseButtonPress, QPointF(80, 80), left, left))
+            window.mouseMoveEvent(event(QEvent.Type.MouseMove, QPointF(180, 180), Qt.MouseButton.NoButton, left))
+            window.mouseReleaseEvent(event(QEvent.Type.MouseButtonRelease, QPointF(180, 180), left, Qt.MouseButton.NoButton))
+            opened.assert_not_called()
+            saved.assert_called_once()
+        window.quit_pet()
+
     @classmethod
     def setUpClass(cls) -> None:
         cls.app = QApplication.instance() or QApplication([])

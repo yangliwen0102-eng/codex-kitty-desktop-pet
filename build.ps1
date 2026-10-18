@@ -4,6 +4,10 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$OriginalPath = $env:PATH
+$Python = (Get-Command $Python -ErrorAction Stop).Source
+# Avoid bundling incompatible system DLL lookalikes from unrelated tools.
+$env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Dist = Join-Path $Root "dist"
 $Build = Join-Path $Root "build"
@@ -40,6 +44,7 @@ try {
             --specpath $TempSpec `
             --add-data "$TempSource\assets\generated\asset-manifest.json;assets\generated" `
             --add-data "$TempSource\assets\generated\frames;assets\generated\frames" `
+            --add-data "$TempSource\assets\pixel;assets\pixel" `
             run_pet.pyw
         if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed." }
     }
@@ -50,7 +55,7 @@ try {
     Copy-Item (Join-Path $TempDist "CodexKittyPet.exe") $Dist
 
     $Check = Start-Process -FilePath (Join-Path $Dist "CodexKittyPet.exe") `
-        -ArgumentList "--check" -Wait -PassThru
+        -ArgumentList "--check" -WindowStyle Hidden -Wait -PassThru
     if ($Check.ExitCode -ne 0) { throw "Packaged runtime check failed." }
 
     $Stage = Join-Path $Release "CodexKittyPet-v$Version-win64"
@@ -62,6 +67,7 @@ try {
 }
 finally {
     Pop-Location
+    $env:PATH = $OriginalPath
 }
 
 Write-Output "Release package: $Release\CodexKittyPet-v$Version-win64.zip"

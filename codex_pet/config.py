@@ -17,7 +17,7 @@ def app_data_dir() -> Path:
 @dataclass
 class PetSettings:
     idle_timeout_seconds: int = 600
-    display_size: int = 220
+    display_size: int = 144
     window_x: int | None = None
     window_y: int | None = None
     codex_home: str = str(Path(os.environ.get("CODEX_HOME", Path.home() / ".codex")))
@@ -35,7 +35,7 @@ class PetSettings:
         defaults = asdict(cls())
         defaults.update({key: value for key, value in data.items() if key in defaults})
         defaults["idle_timeout_seconds"] = max(10, int(defaults["idle_timeout_seconds"]))
-        defaults["display_size"] = min(320, max(140, int(defaults["display_size"])))
+        defaults["display_size"] = min(320, max(96, int(defaults["display_size"])))
         return cls(**defaults)
 
     def save(self, path: Path | None = None) -> None:
