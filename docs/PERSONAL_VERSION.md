@@ -19,10 +19,11 @@
 
 ## 从 GitHub 恢复 Windows 版本
 
-1. 下载本仓库个人版 Release 中的 `CodexKittyPet-v1.0.0-status-win64.zip`。
-2. 解压后双击 `CodexKittyPet.exe`；无需安装 Python。
-3. 如需桌面快捷方式与登录自启动，运行发布包的 `install.ps1`。
-4. 用户位置、尺寸与日志由应用在本机单独保存，不包含在 Git 仓库中。
+目前 GitHub 保存完整源码和素材；个人版 Windows 安装包尚未上传到 Release。
+可以克隆本仓库，按 README 创建 Python 环境、安装 `requirements-dev.txt`，
+再运行 `build.ps1`，从 `release/` 获取 Windows ZIP。
+解压后双击 `CodexKittyPet.exe`；如需快捷方式和登录自启动，运行解压目录的
+`install.ps1`。用户位置、尺寸与日志由应用在本机单独保存，不包含在 Git 仓库中。
 
 源码重新构建沿用 README 和 `build.ps1`。构建脚本会隔离其他工具的 PATH，
 避免同名系统 DLL 被误打包。皮肤源图、预览和生成说明都保存在 `assets/pixel/`。
