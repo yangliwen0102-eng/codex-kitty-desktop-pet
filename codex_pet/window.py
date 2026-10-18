@@ -20,6 +20,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from .macos_window import configure_overlay
 from .animation import AnimationPlayer
 from .activate import activate_codex
 from .platform_support import last_input_tick, codex_is_foreground
@@ -37,6 +38,7 @@ class UsagePopup(QFrame):
         self.setWindowFlags(
             Qt.WindowType.ToolTip
             | Qt.WindowType.FramelessWindowHint
+            | Qt.WindowType.NoDropShadowWindowHint
             | Qt.WindowType.WindowStaysOnTopHint
             | Qt.WindowType.WindowTransparentForInput
         )
@@ -77,6 +79,10 @@ class UsagePopup(QFrame):
             self.source_label,
         ):
             layout.addWidget(widget)
+
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+        configure_overlay(self)
 
     def set_snapshot(self, snapshot: UsageSnapshot) -> None:
         self.snapshot = snapshot
@@ -136,6 +142,7 @@ class PetWindow(QWidget):
         self.setWindowTitle("Codex Kitty Pet")
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint
+            | Qt.WindowType.NoDropShadowWindowHint
             | Qt.WindowType.WindowStaysOnTopHint
             | Qt.WindowType.Tool
         )
@@ -218,6 +225,10 @@ class PetWindow(QWidget):
                 self.y(),
             ),
         )
+
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+        configure_overlay(self)
 
     def _make_tray_menu(self) -> QMenu:
         menu = QMenu()

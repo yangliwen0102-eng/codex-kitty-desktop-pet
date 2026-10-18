@@ -10,6 +10,9 @@ from PyQt6.QtGui import QPainter, QColor, QPen
 from PyQt6.QtWidgets import QFrame, QLabel, QVBoxLayout
 
 
+from .macos_window import configure_overlay
+
+
 class ThreadTitles:
     def __init__(self, codex_home: Path):
         self.home = codex_home
@@ -47,7 +50,7 @@ class StatusBubble(QFrame):
 
     def __init__(self):
         super().__init__(None)
-        self.setWindowFlags(Qt.WindowType.Tool | Qt.WindowType.FramelessWindowHint |
+        self.setWindowFlags(Qt.WindowType.Tool | Qt.WindowType.NoDropShadowWindowHint | Qt.WindowType.FramelessWindowHint |
                             Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.WindowDoesNotAcceptFocus)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating, True)
@@ -73,6 +76,10 @@ class StatusBubble(QFrame):
             label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
             layout.addWidget(label)
         self.setToolTip("点击打开 Codex，查看任务或处理授权")
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        configure_overlay(self)
 
     def set_status(self, title: str, status: str):
         self.title.setText(self.title.fontMetrics().elidedText(title, Qt.TextElideMode.ElideRight, self.width() - 36))

@@ -34,3 +34,22 @@ class MacTests(unittest.TestCase):
         with patch("AppKit.NSWorkspace") as workspace:
             workspace.sharedWorkspace().runningApplications.return_value = []
             self.assertFalse(activate_codex(logging.getLogger("test")))
+
+    def test_overlay_disables_shadow_and_joins_spaces(self):
+        from codex_pet.macos_window import configure_overlay
+        from AppKit import (NSWindowCollectionBehaviorCanJoinAllSpaces,
+                            NSWindowCollectionBehaviorFullScreenAuxiliary,
+                            NSWindowCollectionBehaviorMoveToActiveSpace)
+        native = Mock()
+        native.collectionBehavior.return_value = NSWindowCollectionBehaviorMoveToActiveSpace
+        view = Mock()
+        view.window.return_value = native
+        widget = Mock()
+        widget.winId.return_value = 123
+        with patch("PyQt6.QtWidgets.QApplication.platformName", return_value="cocoa"), patch("objc.objc_object", return_value=view):
+            configure_overlay(widget)
+        native.setHasShadow_.assert_called_once_with(False)
+        flags = native.setCollectionBehavior_.call_args.args[0]
+        self.assertTrue(flags & NSWindowCollectionBehaviorCanJoinAllSpaces)
+        self.assertTrue(flags & NSWindowCollectionBehaviorFullScreenAuxiliary)
+        self.assertFalse(flags & NSWindowCollectionBehaviorMoveToActiveSpace)
